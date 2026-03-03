@@ -7,60 +7,48 @@ import java.util.List;
 
 public class EmployeePayrollService {
 
-    private List<EmployeePayrollData> employeeList;
     private static final String FILE_NAME = "payroll-file.txt";
 
-    public EmployeePayrollService(List<EmployeePayrollData> employeeList) {
-        this.employeeList = employeeList;
-    }
+    public List<EmployeePayrollData> readEmployeePayrollData() {
 
-    public void writeEmployeePayrollData() {
-        StringBuilder builder = new StringBuilder();
+        List<EmployeePayrollData> list = new ArrayList<>();
+        Path path = Paths.get(FILE_NAME);
 
-        employeeList.forEach(emp ->
-                builder.append(emp.toString()).append("\n"));
+        // ✅ Safe Check
+        if (!Files.exists(path)) {
+            System.out.println("File does not exist. Please run UC4 first.");
+            return list;
+        }
 
         try {
-            Files.write(Paths.get(FILE_NAME),
-                    builder.toString().getBytes());
+            Files.lines(path)
+                    .forEach(line -> {
+                        String[] parts = line.split(",");
+                        list.add(new EmployeePayrollData(
+                                Integer.parseInt(parts[0]),
+                                parts[1],
+                                Double.parseDouble(parts[2])
+                        ));
+                    });
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
 
-    public void printData() {
-        try {
-            Files.lines(Paths.get(FILE_NAME))
-                    .forEach(System.out::println);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public long countEntries() {
-        try {
-            return Files.lines(Paths.get(FILE_NAME)).count();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return list;
     }
 
     public static void main(String[] args) {
 
-        List<EmployeePayrollData> list = new ArrayList<>();
-        list.add(new EmployeePayrollData(1, "Jeff", 100000));
-        list.add(new EmployeePayrollData(2, "Bill", 200000));
-        list.add(new EmployeePayrollData(3, "Mark", 300000));
+        EmployeePayrollService service = new EmployeePayrollService();
 
-        EmployeePayrollService service =
-                new EmployeePayrollService(list);
+        List<EmployeePayrollData> employees =
+                service.readEmployeePayrollData();
 
-        service.writeEmployeePayrollData();
-        service.printData();
-
-        System.out.println("Entries Count: "
-                + service.countEntries());
+        if (employees.isEmpty()) {
+            System.out.println("No data found.");
+        } else {
+            System.out.println("Employees read from file:");
+            employees.forEach(System.out::println);
+        }
     }
 }
-
