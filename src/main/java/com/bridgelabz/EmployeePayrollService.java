@@ -1,33 +1,55 @@
 package com.bridgelabz;
 
-import java.util.*;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EmployeePayrollService {
 
-    private List<EmployeePayrollData> employeeList = new ArrayList<>();
+    private List<EmployeePayrollData> employeeList;
+    private static final String FILE_NAME = "payroll-file.txt";
 
-    public void readEmployeePayrollData(Scanner scanner) {
-        System.out.print("Enter Employee ID: ");
-        int id = scanner.nextInt();
-
-        System.out.print("Enter Employee Name: ");
-        String name = scanner.next();
-
-        System.out.print("Enter Employee Salary: ");
-        double salary = scanner.nextDouble();
-
-        employeeList.add(new EmployeePayrollData(id, name, salary));
+    public EmployeePayrollService(List<EmployeePayrollData> employeeList) {
+        this.employeeList = employeeList;
     }
 
     public void writeEmployeePayrollData() {
-        System.out.println("Writing Employee Payroll to Console:");
-        employeeList.forEach(System.out::println);
+        StringBuilder builder = new StringBuilder();
+
+        employeeList.forEach(emp ->
+                builder.append(emp.toString()).append("\n"));
+
+        try {
+            Files.write(Paths.get(FILE_NAME),
+                    builder.toString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public long countEntries() {
+        try {
+            return Files.lines(Paths.get(FILE_NAME)).count();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        EmployeePayrollService service = new EmployeePayrollService();
-        service.readEmployeePayrollData(scanner);
+
+        List<EmployeePayrollData> list = new ArrayList<>();
+        list.add(new EmployeePayrollData(1, "Jeff", 100000));
+        list.add(new EmployeePayrollData(2, "Bill", 200000));
+        list.add(new EmployeePayrollData(3, "Mark", 300000));
+
+        EmployeePayrollService service =
+                new EmployeePayrollService(list);
+
         service.writeEmployeePayrollData();
+
+        System.out.println("Entries Written: "
+                + service.countEntries());
     }
 }
