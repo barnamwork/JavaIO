@@ -28,6 +28,15 @@ public class EmployeePayrollService {
         }
     }
 
+    public void printData() {
+        try {
+            Files.lines(Paths.get(FILE_NAME))
+                    .forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public long countEntries() {
         try {
             return Files.lines(Paths.get(FILE_NAME)).count();
@@ -48,8 +57,9 @@ public class EmployeePayrollService {
                 new EmployeePayrollService(list);
 
         service.writeEmployeePayrollData();
+        service.printData();
 
-        System.out.println("Entries Written: "
+        System.out.println("Entries Count: "
                 + service.countEntries());
     }
 }
